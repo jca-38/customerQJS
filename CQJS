@@ -1,0 +1,88 @@
+import React from 'react';
+import {
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    ActivityIndicator,
+    FlatList,
+    TextInput,
+    Button,
+} from 'react-native';
+
+import {StackNavigator} from 'react-navigation';
+import MenuButtonWS from '../Components/MenuButtonWS';
+
+
+export default class CustomerQue extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = {
+            rlocationcode: '',
+        }
+    }
+
+
+    render() {
+        return (
+            <View style={styles.container}>
+                <MenuButtonWS navigation={this.props.navigation} />
+                <TextInput
+                    style={styles.textInput} placeholder='Restaurant Location Code'
+                    onChangeText={ (rlocationcode) => this.setState({rlocationcode}) }
+                    underlineColorAndroid='transparent'
+                />
+                <TouchableOpacity
+                    style={styles.btn}
+                    onPress={this.grabCustomers}>
+                    <Text>Customer Que</Text>
+                </TouchableOpacity>
+
+                
+                    
+            </View>
+        )   
+    }
+
+    grabCustomers = () => {
+
+        fetch('MyPhPCode')
+            .then((response) => response.json())
+            .then((responseJson) => {
+                console.log(responseJson);
+                return responseJson;
+            })
+        .catch((error) => {
+            console.log(error);
+        });
+    }
+}
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: '#40B7FA',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingLeft: 40,
+        paddingRight: 40,
+    },
+    textInput: {
+        alignSelf: 'stretch',
+        padding: 16,
+        marginBottom: 20,
+        backgroundColor: '#40B7FA',
+        borderRadius: 4,
+        borderWidth: 4.0,
+        borderColor: '#030303',
+        fontWeight: 'bold',
+    },
+    btn: {
+        alignSelf: 'stretch',
+        backgroundColor: '#fff',
+        padding: 20,
+        paddingBottom: 20,
+        alignItems: 'center',
+        borderRadius: 75,
+    },
+})
