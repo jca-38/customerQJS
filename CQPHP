@@ -1,0 +1,23 @@
+<?php 
+// my connection works....removed it from code for here.
+
+$POST = filter_var_array($_POST, FILTER_SANITIZE_STRING);
+$json = file_get_contents('php://input');
+$obj = json_decode($json,true);
+
+$rlocationcode = $POST['rlocationcode'];
+$uname = $POST['uname'];
+
+$Sql_Query = "SELECT * FROM (DB name) WHERE rlocationcode= '.$rlocationcode' ";
+$result = mysqli_query($conn, $Sql_Query);
+
+if (mysqli_num_rows($result) > 0) {
+	while($row = mysqli_fetch_assoc($result)) {
+		echo $row["uname"]. "<br>";
+	}
+} else {
+	echo "0 results";
+}
+
+
+ ?>
