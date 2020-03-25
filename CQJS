@@ -22,15 +22,26 @@ export default class CustomerQue extends React.Component {
         super(props);
         this.state = {
             isloading: true,
+            rlocationcode: '',
             text: '',
             data: []
         }
         this.arrayholder = [] ;
     }
 
-    componentDidMount() {
+    grabCustomers = (input) => {
+        console.log(`Input data type: ${typeof(input)}`);
+        console.log(input);
+        this.setState({loading: true})
         
-        return fetch('myPhpCode')
+        fetch('url', {
+            method: 'POST',
+            body: JSON.stringify(),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        })
             .then((response) => response.text())
             .then((responseJson) => {
                 this.setState({
@@ -45,13 +56,13 @@ export default class CustomerQue extends React.Component {
             });
     }
     
-    GetFlatListItem (uname) {
-        Alert.alert(uname);
+    GetFlatListItem (name) {
+        Alert.alert(name);
     }
 
     searchData(text){
         const newData = this.arrayholder.filter(item => {
-            const itemData = item.uname.toUpperCase();
+            const itemData = item.name.toUpperCase();
             const textData = text.toUpperCase();
             return itemData.indexOf(textData) > -1
         })
@@ -96,14 +107,19 @@ export default class CustomerQue extends React.Component {
                     value={this.state.text}
                     underlineColorAndroid='transparent'
                 />
-                
+                <TouchableOpacity
+                    style={styles.btn}
+                    onPress={this.grabCustomers}>
+                    <Text>Check Que</Text>
+                </TouchableOpacity>
+
                 <FlatList 
                     data={this.state.data}
                     keyExtractor={ (item, index) => index.toString() }
                     ItemSeparatorComponent= {this.itemSeparator}
                     renderItem={({ item }) => <Text style={styles.row}
-                    onPress={this.GetFlatListItem.bind(this, item.uname)}>{item.uname} </Text>}
-                    style={{marginTop: 10}}
+                    onPress={this.GetFlatListItem.bind(this, item.name)}>{this.state.name} </Text>}
+                    style={{flex: 1, marginTop: 10, width: '100%'}}
                 />           
             </View>
         );   
