@@ -21,22 +21,74 @@ export default class CustomerQue extends React.Component {
     constructor(props){
         super(props);
         this.state = {
-            isloading: true,
             rlocationcode: '',
-            text: '',
-            data: []
-        }
-        this.arrayholder = [] ;
+            dataSource: [],
+        };
     }
 
-    grabCustomers = (input) => {
-        console.log(`Input data type: ${typeof(input)}`);
-        console.log(input);
-        this.setState({loading: true})
+    componentDidMount() {
+        this.grabCustomers();
+    }
+
+    itemSeparator = () => {
+        return (
+            <View 
+                style={{
+                    height: 5,
+                    width: "100%",
+                    backgroundColor: "#fff",
+                }}
+            />
+        );
+    }
+    
+
+    render() {
+
+        return (
+            <View style={styles.Maincontainer}>
+                <MenuButtonWS navigation={this.props.navigation} />
+
+                <TextInput
+                    style={styles.textInput} placeholder='Customers User ID'
+                    onChangeText={(rlocationcode) => this.setState({rlocationcode})}
+                    value={this.state.rlocationcode}
+                    underlineColorAndroid='transparent'
+                />
+
+                <TouchableOpacity
+                    style={styles.btn}
+                    onPress={this.grabCustomers}>
+                    <Text>Customer Que</Text>
+                </TouchableOpacity>
+
+                <FlatList
+                    
+                    data={this.state.dataSource}
+                    extraData={this.state}
+                    keyExtractor={(item, index) => index.toString()}
+                    ItemSeparatorComponent={this.itemSeparator}
+                    style={{ marginTop: 10 }}
+                    renderItem={({ item }) => (
+                        <View>
+                            <Text style={styles.row}>{`${this.state.dataSource}`}</Text>
+                            
+                        </View>
+                    )}
+                />
+    
+            </View>
+        );   
+    }
+
+    grabCustomers = () => {
+        let rlc = {
+            rlocationcode: this.state.rlocationcode,
+        };
         
-        fetch('url', {
+        fetch('URL', {
             method: 'POST',
-            body: JSON.stringify(),
+            body: JSON.stringify(rlc),
             headers: {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
@@ -45,83 +97,49 @@ export default class CustomerQue extends React.Component {
             .then((response) => response.text())
             .then((responseJson) => {
                 this.setState({
-                    loading: false,
-                    data: responseJson,
-                }, () => {
-                    
+                    dataSource: responseJson
                 });
+                console.log(responseJson)
             })
             .catch((error) => {
-                console.error(error);
+                console.log(error);
             });
     }
-    
-    GetFlatListItem (name) {
-        Alert.alert(name);
-    }
-
-    searchData(text){
-        const newData = this.arrayholder.filter(item => {
-            const itemData = item.name.toUpperCase();
-            const textData = text.toUpperCase();
-            return itemData.indexOf(textData) > -1
-        })
-        this.setState({
-            data: newData,
-            text: text
-        })
-    }
-
-    itemSeparator = () => {
-        return (
-            <View 
-                style={{
-                    height: .5,
-                    width: '100%',
-                    backgroundColor: '#fff',
-                }}
-            />
-        );
-    }
-
-
-    render() {
-
-        if (this.state.loading) {
-            return (
-                <View style={{flex: 1, paddingTop: 20}}>
-
-                    <ActivityIndicator />
-
-                </View>
-            );
-        }
-
-        return (
-            <View style={styles.Maincontainer}>
-                <MenuButtonWS navigation={this.props.navigation} />
-
-                <TextInput
-                    style={styles.textInput} placeholder='Customers User ID'
-                    onChangeText={(text) => this.searchData(text)}
-                    value={this.state.text}
-                    underlineColorAndroid='transparent'
-                />
-                <TouchableOpacity
-                    style={styles.btn}
-                    onPress={this.grabCustomers}>
-                    <Text>Check Que</Text>
-                </TouchableOpacity>
-
-                <FlatList 
-                    data={this.state.data}
-                    keyExtractor={ (item, index) => index.toString() }
-                    ItemSeparatorComponent= {this.itemSeparator}
-                    renderItem={({ item }) => <Text style={styles.row}
-                    onPress={this.GetFlatListItem.bind(this, item.name)}>{this.state.name} </Text>}
-                    style={{flex: 1, marginTop: 10, width: '100%'}}
-                />           
-            </View>
-        );   
+    GetFlatListItem(uname) {
+        Alert.alert(uname);
     }
 }
+const styles = StyleSheet.create({
+    Maincontainer: {
+        flex: 1,
+        backgroundColor: '#40B7FA',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingLeft: 80,
+        paddingRight: 80,
+    },
+    row: {
+        fontSize: 18,
+        padding: 12,
+    },
+    textInput: {
+        textAlign: 'center',
+        height: 42,
+        backgroundColor: '#fff',
+        borderRadius: 8,
+        borderWidth: 1,
+        borderColor: '#030303',
+        fontWeight: 'bold',
+    },
+    btn: {
+        alignSelf: 'stretch',
+        backgroundColor: '#fff',
+        padding: 20,
+        paddingBottom: 20,
+        alignItems: 'center',
+        borderRadius: 50,
+    },
+    text: {
+        color: '#fff',
+    }
+})
