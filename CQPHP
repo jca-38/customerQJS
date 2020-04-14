@@ -5,20 +5,22 @@ $POST = filter_var_array($_POST, FILTER_SANITIZE_STRING);
 $json = file_get_contents('php://input');
 $obj = json_decode($json,true);
 
-if (isset($POST['grabCustomers'])) {
-	$search = mysqli_real_escape_string($conn, $POST['rlocationcode']);
-	$Sql_Query = "SELECT uname FROM restaurantque WHERE restaurantque_rlocationcode= '$search'";
-	$result = mysqli_query($conn, $Sql_Query);
-	$queryResult = mysqli_num_rows($result);
-	$response = array();
+$rlocationcode = $obj['rlocationcode'];
+$Sql_Query = "SELECT * FROM restaurantque WHERE rlocationcode=?;";
+$stmt = mysqli_stmt_init($conn);
 
-	if ($queryResult > 0) {
+if (!mysqli_stmt_prepare($stmt, $Sql_Query)) {
+	echo "Sql statment failed";
+	exit();
+} else {
+	mysqli_stmt_bind_param($stmt, "i", $rlocationcode);
+	mysqli_stmt_execute($stmt);
+	$result = mysqli_stmt_get_result($stmt);
+
+	if (mysqli_num_rows($result) > 0) {
 		while ($row = mysqli_fetch_assoc($result)) {
-			$response = $row['uname']. "<br>";
+			echo $row['uname'] . "<br>";
 		}
-		echo json_encode($response);
-	} else {
-		echo "There are no users checked in.";
 	}
 }
 
