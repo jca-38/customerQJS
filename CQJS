@@ -94,7 +94,7 @@ export default class CustomerQue extends React.Component {
                 'Content-Type': 'application/json',
             },
         })
-            .then((response) => response.text())
+            .then((response) => response.json())
             .then((responseJson) => {
                 this.setState({
                     dataSource: responseJson
