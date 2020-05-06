@@ -1,0 +1,127 @@
+import React from 'react';
+import {
+    ScrollView,
+    View,
+    Text,
+    FlatList,
+    Alert,
+    TouchableOpacity,
+    TextInput,
+    StyleSheet,
+    Dimensions,
+    TouchableHighlight,
+    handleTouchItem,
+} from 'react-native';
+
+import {StackNavigator} from 'react-navigation';
+import MenuButtonWS from '../Components/MenuButtonWS';
+import Ionicons from  'react-native-vector-icons/Ionicons';
+
+const numColumns = 3
+const WIDTH = Dimensions.get('window').width
+
+export default class Tables extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.array = [],
+        this.state = {
+            arrayHolder: [],
+            disabled: true,
+            textInput_Holder: ''
+        }
+    }
+
+    componentDidMount() {
+        this.setState({ arrayHolder: [...this.array]})
+    }
+
+    _addTable = () => {
+        this.array.push({Table : this.state.textInput_Holder});
+        this.setState({ arrayHolder: [...this.array] });
+    }
+
+    _setTable = (item) => {
+        const  { navigation } = this.props;
+        const cust = navigation.getParam('cust_ID', 'No-User');
+        const other_param = navigation.getParam('otherParam', 'No-User');
+
+        const cust1 = JSON.stringify(cust);
+
+        let Tab = [this.array];
+        let TAC = Tab.push(cust1);
+     }
+
+     _openTable = () => {
+        const  { navigation } = this.props;
+        const cust = navigation.getParam('cust_ID', 'No-User');
+        const other_param = navigation.getParam('otherParam', 'No-User');
+
+        const cust1 = JSON.stringify(cust);
+
+        let Tab = [this.array];
+        let TAC = Tab.concat(cust1);
+
+        this.props.navigation.navigate('ViewParty', {
+            TAC1: TAC,
+            otherParam: '101',
+        });
+     }
+
+    
+
+    GetGridViewItem(item) {
+        Alert.alert(item);
+    }
+
+    render() {
+        const  { navigation } = this.props;
+        const cust = navigation.getParam('cust_ID', 'No-User');
+        const other_param = navigation.getParam('otherParam', 'No-User');
+
+        const cust1 = JSON.stringify(cust);
+        const cust2 = cust1.replace(/[\])}[{(]/g, '');
+        const cust3 = cust2.replace(/[""]/g, '');
+        
+        return (
+            <View style={styles.container}>
+                <MenuButtonWS navigation={this.props.navigation} />
+                <TextInput
+                    style={styles.textInput} placeholder='Table Number'
+                    onChangeText={data => this.setState({ textInput_Holder: data})}
+                    underlineColorAndroid='transparent'
+                />
+
+                <TouchableOpacity
+                    style={styles.btn}
+                    onPress={this._addTable}>
+                    <Text>Add Table</Text>
+                </TouchableOpacity>
+                <Text>{cust3}</Text>
+                
+
+                <FlatList
+                    data={this.state.arrayHolder}
+                    keyExtractor={(item, index) => index.toString()}
+                    numColumns={numColumns}
+                    renderItem={({ item, index }) =>  (
+                        <TouchableOpacity onPress={this._openTable}>
+                            <View style={styles.itemStyle}>
+                                <Text style={styles.row}>{item.Table}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+
+                <TouchableOpacity
+                    style={styles.btn}
+                    onPress={this._setTable}>
+                    <Text>Set Table</Text>
+                </TouchableOpacity>
+
+
+            </View>
+        )
+    }
+
+}
