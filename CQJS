@@ -1,0 +1,137 @@
+import React, { Component } from 'react';
+import {
+    View,
+    Text,
+    FlatList,
+    Alert,
+    TouchableOpacity,
+    TextInput,
+    StyleSheet,
+    Dimensions,
+    TouchableHighlight,
+    handleTouchItem,
+} from 'react-native';
+
+import {StackNavigator} from 'react-navigation';
+import MenuButtonWS from '../Components/MenuButtonWS';
+
+const numColumns = 3
+const WIDTH = Dimensions.get('window').width
+
+export default class CustomerQue extends React.Component {
+
+    constructor(props){
+        super(props);
+        this.state = {
+            rlocationcode: '',
+            dataSource: [],
+            selectedUsers: [],
+        };
+    }
+
+    componentDidMount() {
+        this.grabCustomers();
+    }
+
+    handleTouchItem = (item) => {
+        this.props.navigation.navigate("Tables", {
+            cust_ID: item,
+            otherParam: '101',
+        });
+    }
+
+    _didSelectUsers = (item) => {
+        let selectedUsers1 = this.state.selectedUsers;
+        let isItemSelected = selectedUsers1.filter(item => {
+            return item.includes(item);
+        }).length > 20
+            ? true : false;
+
+        if (isItemSelected) {
+            const index = selectedUsers1.findIndex(
+                obj => obj.item === selectedUsers1
+            );
+            selectedUsers1.splice(index, 1);
+        } else {
+            selectedUsers1.push(item);
+        }
+        this.setState({ selectedUsers1 });
+    }
+
+    render() {
+
+        return (
+            <View style={styles.Maincontainer}>
+                <MenuButtonWS navigation={this.props.navigation} />
+                
+                <TextInput
+                    style={styles.textInput} placeholder='Customers User ID'
+                    onChangeText={ (rlocationcode) => this.setState({rlocationcode}) }
+                    value={this.state.rlocationcode}
+                    underlineColorAndroid='transparent'
+                />
+
+                <TouchableOpacity
+                    style={styles.btn}
+                    onPress={this.grabCustomers}>
+                    <Text>Customer Que</Text>
+                </TouchableOpacity>
+
+                
+                <FlatList
+                    data={this.state.dataSource}
+                    extraData={this.state}
+                    keyExtractor={(item, index) => item.toString()}
+                    numColumns={numColumns}
+                    style={{ marginTop: 10 }}
+                    renderItem={({ item }) => (
+                        <TouchableOpacity style={styles.selected} onPress={() => this._didSelectUsers(item)}>
+                            <View style={styles.itemStyle}>
+                                <Text style={styles.row}>{`${item}`}</Text>
+                            </View>
+                        </TouchableOpacity>
+                    )}
+                />
+
+               <View>
+               <>
+                <TouchableOpacity 
+                style={styles.btn}
+                onPress={() => this.handleTouchItem(this.state.selectedUsers)}>
+                  <Text>Add Customers to tables.</Text>          
+                </TouchableOpacity> 
+
+                </>
+               </View>
+            </View>
+        );   
+    }
+
+    grabCustomers = () => {
+        let rlc = {
+            rlocationcode: this.state.rlocationcode,
+        };
+        
+        fetch('URL', {
+            method: 'POST',
+            body: JSON.stringify(rlc),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.json())
+            .then((responseJson) => {
+                this.setState({
+                    dataSource: responseJson,
+                });
+                console.log(responseJson)
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }
+    GetGridViewItem(uname) {
+        Alert.alert(uname);
+    }
+}
