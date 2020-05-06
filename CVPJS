@@ -1,0 +1,44 @@
+import React from 'react';
+import {
+    ScrollView,
+    View,
+    Text,
+    FlatList,
+    Alert,
+    TouchableOpacity,
+    TextInput,
+    StyleSheet,
+    Dimensions,
+    TouchableHighlight,
+    handleTouchItem,
+} from 'react-native';
+
+import {StackNavigator} from 'react-navigation';
+import MenuButtonWS from '../Components/MenuButtonWS';
+import Ionicons from  'react-native-vector-icons/Ionicons';
+
+const numColumns = 3
+const WIDTH = Dimensions.get('window').width
+
+export default class ViewParty extends React.Component {
+
+    render() {
+        const  { navigation } = this.props;
+        const group = navigation.getParam('TAC1', 'No-User');
+        const other_param = navigation.getParam('otherParam', 'No-User');
+
+        const group1 = JSON.stringify(group);
+        const group2 = group1.replace(/[\])}[{(]/g, '');
+        const group3 = group2.replace(/[""\\]/gm, '\n');
+        const group4 = group3.replace(/[:,]/g, '');
+
+        
+        return (
+            <View style={styles.container}>
+                <MenuButtonWS navigation={this.props.navigation} />
+                
+                <Text style={styles.text}>{group4}</Text>
+            </View>
+        )
+    }
+}
