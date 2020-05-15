@@ -14,6 +14,12 @@ import {
 
 import {StackNavigator} from 'react-navigation';
 import MenuButtonWS from '../Components/MenuButtonWS';
+import { 
+    Input,
+    ButtonGroup, 
+} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const numColumns = 3
 const WIDTH = Dimensions.get('window').width
@@ -33,11 +39,32 @@ export default class CustomerQue extends React.Component {
         this.grabCustomers();
     }
 
+    handleTouchItem2 = async (item) => {
+        try {
+            let users = this.state.dataSource;
+            await AsyncStorage.setItem('users', JSON.stringify(users));
+            this.props.navigation.navigate("Tables", {
+                cust_ID: item,
+                otherParam: '101',
+            });
+        } catch (error) {
+            console.log('There is no one checked in', error.message);
+        }
+    }
+
     handleTouchItem = (item) => {
         this.props.navigation.navigate("Tables", {
             cust_ID: item,
             otherParam: '101',
         });
+    }
+
+    handleQueryChange = (rlocationcode) => {
+        this.setState(state => ({ ...state, rlocationcode: rlocationcode || " "}));
+    }
+
+    _clearLocationcode = () => {
+        this.handleQueryChange("");
     }
 
     _didSelectUsers = (item) => {
@@ -58,14 +85,46 @@ export default class CustomerQue extends React.Component {
         this.setState({ selectedUsers1 });
     }
 
+    _clearUsers = async (item) => {
+        try {
+            await AsyncStorage.removeItem('users');
+            const clear = await AsyncStorage.getItem('users');
+            console.log('users');
+        } catch(error) {
+            console.log('No users to remove', error.message)
+        }
+    }
+
+    _clearUsers1= (item) => {
+        let selectedUser1 = this.state.selectedUsers;
+        selectedUser1.pop();
+        console.log(selectedUser1);
+    }
+
     render() {
 
         return (
             <View style={styles.Maincontainer}>
                 <MenuButtonWS navigation={this.props.navigation} />
                 
-                <TextInput
-                    style={styles.textInput} placeholder='Customers User ID'
+                <Input
+                    style={styles.inputContainerStyle} 
+                    placeholder='Enter LocationCode'
+                    leftIcon={
+                        <Icon
+                        name='location-arrow' 
+                        size={24}
+                        color='black'
+                        />
+                    }
+                    rightIcon={
+                        <Icon 
+                        name='chevron-left'
+                        size={15}
+                        color='black'
+                        onPress={this._clearLocationcode}
+                        />
+                    }
                     onChangeText={ (rlocationcode) => this.setState({rlocationcode}) }
                     value={this.state.rlocationcode}
                     underlineColorAndroid='transparent'
@@ -93,15 +152,19 @@ export default class CustomerQue extends React.Component {
                     )}
                 />
 
-               <View>
-               <>
-                <TouchableOpacity 
-                style={styles.btn}
-                onPress={() => this.handleTouchItem(this.state.selectedUsers)}>
-                  <Text>Add Customers to tables.</Text>          
-                </TouchableOpacity> 
-
-                </>
+               <View style={{ flexDirection: 'row'}}>
+                <View style={styles.btn1}>
+                    <TouchableOpacity 
+                        onPress={() => this.handleTouchItem2(this.state.selectedUsers)}>
+                        <Text>Next</Text>          
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.btn1}>
+                    <TouchableOpacity
+                        onPress={this._clearUsers1}>
+                        <Text>Clear</Text>
+                    </TouchableOpacity> 
+                </View> 
                </View>
             </View>
         );   
