@@ -16,6 +16,13 @@ import {
 import {StackNavigator} from 'react-navigation';
 import MenuButtonWS from '../Components/MenuButtonWS';
 import Ionicons from  'react-native-vector-icons/Ionicons';
+import { 
+    Input,
+    ListItem,
+    ButtonGroup,
+} from 'react-native-elements';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-community/async-storage';
 
 const numColumns = 3
 const WIDTH = Dimensions.get('window').width
@@ -28,19 +35,56 @@ export default class Tables extends React.Component {
         this.state = {
             arrayHolder: [],
             disabled: true,
-            textInput_Holder: ''
+            textInput_Holder: '',
+            selectedIndex: 2,
         }
+        this.updateIndex = this.updateIndex.bind(this)
+    }
+
+    updateIndex (selectedIndex) {
+        this.setState({selectedIndex})
+        this._addTable(selectedIndex)
+        this._setTable2(selectedIndex)
     }
 
     componentDidMount() {
         this.setState({ arrayHolder: [...this.array]})
     }
 
-    _addTable = () => {
-        this.array.push({Table : this.state.textInput_Holder});
-        this.setState({ arrayHolder: [...this.array] });
+    handleQueryChange = (textInput_Holder) => {
+        this.setState(state => ({ ...state, textInput_Holder: textInput_Holder || " "}));
     }
 
+    _addTable = (index) => {
+        if (index === 0) {
+            this.array.push({Table : this.state.textInput_Holder});
+            this.setState({ arrayHolder: [...this.array] }); 
+        }
+    }
+
+    _clearTable = () => {
+        this.handleQueryChange("");
+    }
+
+    _setTable2 = async (index) => {
+        if (index === 1) {
+            const  { navigation } = this.props;
+            const cust = navigation.getParam('cust_ID', 'No-User');
+            const other_param = navigation.getParam('otherParam', 'No-User');
+
+            const cust1 = JSON.stringify(cust);
+            const cust2 = cust1.replace(/[\])}[{(]/g, '');
+            const cust3 = cust2.replace(/[""]/g, '');
+            try {
+                await AsyncStorage.setItem('cust3', cust3)
+                let Tab = [this.array];
+                let TAC = Tab.concat(cust3);
+            } catch(error) {
+                console.log('There is a problem', error.message);
+            }
+        }
+            
+    }
     _setTable = (item) => {
         const  { navigation } = this.props;
         const cust = navigation.getParam('cust_ID', 'No-User');
@@ -52,27 +96,17 @@ export default class Tables extends React.Component {
         let TAC = Tab.push(cust1);
      }
 
-     _openTable = () => {
-        const  { navigation } = this.props;
-        const cust = navigation.getParam('cust_ID', 'No-User');
-        const other_param = navigation.getParam('otherParam', 'No-User');
-
-        const cust1 = JSON.stringify(cust);
-
-        let Tab = [this.array];
-        let TAC = Tab.concat(cust1);
-
-        this.props.navigation.navigate('ViewParty', {
-            TAC1: TAC,
-            otherParam: '101',
-        });
+     _openTable = async () => {
+        try {
+            const party = await AsyncStorage.getItem('cust3');
+            this.props.navigation.navigate('ViewParty', {
+                TAC1: party,
+                otherParam: '101',
+            });
+        } catch(error) {
+            console.log('No Table', error.message)
+        }
      }
-
-    
-
-    GetGridViewItem(item) {
-        Alert.alert(item);
-    }
 
     render() {
         const  { navigation } = this.props;
@@ -82,44 +116,60 @@ export default class Tables extends React.Component {
         const cust1 = JSON.stringify(cust);
         const cust2 = cust1.replace(/[\])}[{(]/g, '');
         const cust3 = cust2.replace(/[""]/g, '');
+
+        const buttons = ['Add', 'Set']
+        const { selectedIndex } = this.state
         
         return (
             <View style={styles.container}>
                 <MenuButtonWS navigation={this.props.navigation} />
-                <TextInput
-                    style={styles.textInput} placeholder='Table Number'
-                    onChangeText={data => this.setState({ textInput_Holder: data})}
+
+                <Input
+                    style={styles.textInput} 
+                    placeholder='Table Number'
+                    leftIcon={
+                        <Icon
+                        name='table' 
+                        size={24}
+                        color='black'
+                        />
+                    }
+                    rightIcon={
+                        <Icon 
+                        name='chevron-left'
+                        size={15}
+                        color='black'
+                        onPress={this._clearTable}
+                        />
+                    }
+                    onChangeText={ (textInput_Holder) => this.setState({textInput_Holder})}
+                    value={this.state.textInput_Holder}
                     underlineColorAndroid='transparent'
                 />
 
-                <TouchableOpacity
-                    style={styles.btn}
-                    onPress={this._addTable}>
-                    <Text>Add Table</Text>
-                </TouchableOpacity>
-                <Text>{cust3}</Text>
-                
+                <ButtonGroup 
+                onPress={this.updateIndex}
+                selectedIndex={selectedIndex}
+                selectedButtonStyle={{backgroundColor: 'blue'}}
+                buttons={buttons}
+                containerStyle={styles.buttonGroup}
+                />
 
+                
                 <FlatList
                     data={this.state.arrayHolder}
                     keyExtractor={(item, index) => index.toString()}
-                    numColumns={numColumns}
-                    renderItem={({ item, index }) =>  (
-                        <TouchableOpacity onPress={this._openTable}>
-                            <View style={styles.itemStyle}>
-                                <Text style={styles.row}>{item.Table}</Text>
-                            </View>
-                        </TouchableOpacity>
+                    //numColumns={numColumns}
+                    renderItem={({item, index }) => (
+                        <ListItem
+                        titleStyle={{ color: 'black', fontWeight: 'bold'}}
+                        title={item.Table}
+                        onPress={this._openTable}
+                        bottomDivider
+                        chevron
+                        />
                     )}
-                />
-
-                <TouchableOpacity
-                    style={styles.btn}
-                    onPress={this._setTable}>
-                    <Text>Set Table</Text>
-                </TouchableOpacity>
-
-
+                />    
             </View>
         )
     }
