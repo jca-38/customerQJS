@@ -34,6 +34,7 @@ export default class Tables extends React.Component {
         this.array = [],
         this.state = {
             arrayHolder: [],
+            party: [],
             disabled: true,
             textInput_Holder: '',
             selectedIndex: 2,
@@ -45,6 +46,7 @@ export default class Tables extends React.Component {
         this.setState({selectedIndex})
         this._addTable(selectedIndex)
         this._setTable2(selectedIndex)
+        this._clearParty(selectedIndex)
     }
 
     componentDidMount() {
@@ -66,6 +68,13 @@ export default class Tables extends React.Component {
         this.handleQueryChange("");
     }
 
+    _clearParty = async (index) => {
+        if (index === 2) {
+            this.props = '';
+            console.log(this.props);
+        }
+    }
+
     _setTable2 = async (index) => {
         if (index === 1) {
             const  { navigation } = this.props;
@@ -75,10 +84,15 @@ export default class Tables extends React.Component {
             const cust1 = JSON.stringify(cust);
             const cust2 = cust1.replace(/[\])}[{(]/g, '');
             const cust3 = cust2.replace(/[""]/g, '');
+            this.setState(prevState => ({
+                party: [cust3, ...prevState.party]
+            }))
+            
             try {
                 await AsyncStorage.setItem('cust3', cust3)
                 let Tab = [this.array];
-                let TAC = Tab.concat(cust3);
+                let TAC = Tab.concat([cust3]);
+                console.log(this.state.party);
             } catch(error) {
                 console.log('There is a problem', error.message);
             }
@@ -117,7 +131,7 @@ export default class Tables extends React.Component {
         const cust2 = cust1.replace(/[\])}[{(]/g, '');
         const cust3 = cust2.replace(/[""]/g, '');
 
-        const buttons = ['Add', 'Set']
+        const buttons = ['Add', 'Set', 'Clear']
         const { selectedIndex } = this.state
         
         return (
