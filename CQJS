@@ -87,9 +87,9 @@ export default class CustomerQue extends React.Component {
 
     _clearUsers = async (item) => {
         try {
-            await AsyncStorage.removeItem('users');
             const clear = await AsyncStorage.getItem('users');
-            console.log('users');
+            await AsyncStorage.removeItem(clear); 
+            console.log(clear);
         } catch(error) {
             console.log('No users to remove', error.message)
         }
@@ -97,7 +97,7 @@ export default class CustomerQue extends React.Component {
 
     _clearUsers1= (item) => {
         let selectedUser1 = this.state.selectedUsers;
-        selectedUser1.pop();
+        selectedUser1.length = 0;
         console.log(selectedUser1);
     }
 
