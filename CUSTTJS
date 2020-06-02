@@ -53,6 +53,7 @@ export default class Tables extends React.Component {
     componentDidMount() {
         this.setState({ arrayHolder: [...this.array]})
     }
+    
 
     handleQueryChange = (textInput_Holder) => {
         this.setState(state => ({ ...state, textInput_Holder: textInput_Holder || " "}));
@@ -61,7 +62,10 @@ export default class Tables extends React.Component {
     _addTable = (index) => {
         if (index === 0) {
             this.array.push({Table : this.state.textInput_Holder});
-            this.setState({ arrayHolder: [...this.array] }); 
+            for (var i = 0; i < this.array.length; i++) {
+                this.setState({ arrayHolder: [...this.array] });
+                console.log(this.array); 
+            }
         }
     }
 
@@ -85,16 +89,18 @@ export default class Tables extends React.Component {
             const cust1 = JSON.stringify(cust);
             const cust2 = cust1.replace(/[\])}[{(]/g, '');
             const cust3 = cust2.replace(/[""]/g, '');
-            this.setState(prevState => ({
-                party: [cust3, ...prevState.party]
-            }))
             
             try {
                 await AsyncStorage.setItem('cust3', cust3)
                 let Tab = [this.array];
                 let TAC = Tab.concat([cust3]);
-                this.party.push([TAC]);
-                console.log(TAC);
+                this.state.party.push([cust3]);
+                for (var i = 0; i < this.state.party.length; i++) {
+                    this.setState({ party: [...this.state.party]})
+                    console.log(this.state.party.join('\r\n'));
+                    return this.state.party.join('\r\n');
+                }
+                
             } catch(error) {
                 console.log('There is a problem', error.message);
             }
