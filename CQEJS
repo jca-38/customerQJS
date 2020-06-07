@@ -81,7 +81,7 @@ export default class CustomerQue extends React.Component {
             );
             selectedUsers1.splice(index, 1);
         } else {
-            selectedUsers1.push(item);
+            selectedUsers1.push([item]);
         }
         this.setState({ ...selectedUsers1 });
         console.log(selectedUsers1)
