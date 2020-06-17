@@ -39,7 +39,7 @@ export default class CustomerQue extends React.Component {
         this.grabCustomers();
     }
 
-
+    //this is the code that sends the selected items to the next screen (handleTouchItem2)
     handleTouchItem2 = async (item) => {
         try {
             let users = this.state.dataSource;
@@ -67,7 +67,8 @@ export default class CustomerQue extends React.Component {
     _clearLocationcode = () => {
         this.handleQueryChange("");
     }
-
+    
+    //this is the code that selects the users (_didSelectUsers)
     _didSelectUsers = (item) => {
         let selectedUsers1 = this.state.selectedUsers;
         let isItemSelected = selectedUsers1.filter(item => {
