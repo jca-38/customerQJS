@@ -79,7 +79,7 @@ export default class Tables extends React.Component {
             console.log(this.props);
         }
     }
-
+    //this is the code that once consumer adds the table..they hit this button and it adds the users from the previous page to the table number)
     _setTable2 = async (index) => {
         if (index === 1) {
             const  { navigation } = this.props;
@@ -123,7 +123,7 @@ export default class Tables extends React.Component {
             console.log(this.party);
         }
     }
-     
+     //this code here is used when someone clicks on the actual table number to open it up and view the users that have been assigned to that table.
      _openTable = async () => {
         try {
             const partyGroup = await AsyncStorage.getItem('cust3');
