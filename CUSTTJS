@@ -36,7 +36,6 @@ export default class Tables extends React.Component {
         this.state = {
             arrayHolder: [],
             party: [],
-            disabled: true,
             textInput_Holder: '',
             selectedIndex: 2,
         }
@@ -52,8 +51,16 @@ export default class Tables extends React.Component {
 
     componentDidMount() {
         this.setState({ arrayHolder: [...this.array]})
+        this.setState({ party: [...this.party]})
     }
     
+    componentDidUpdate(prevProps, preState) {
+        if (prevProps.data !== this.props.data) {
+            this.party = cust_ID({
+                data: this.props.data
+            });
+        }
+    }
 
     handleQueryChange = (textInput_Holder) => {
         this.setState(state => ({ ...state, textInput_Holder: textInput_Holder || " "}));
@@ -75,11 +82,13 @@ export default class Tables extends React.Component {
 
     _clearParty = async (index) => {
         if (index === 2) {
-            this.props = '';
-            console.log(this.props);
+           this.props.navigation.navigate("CustomerQue", {
+                cust_ID: null,
+                otherParam: '101',
+            });
         }
     }
-    //this is the code that once consumer adds the table..they hit this button and it adds the users from the previous page to the table number)
+
     _setTable2 = async (index) => {
         if (index === 1) {
             const  { navigation } = this.props;
@@ -90,16 +99,17 @@ export default class Tables extends React.Component {
             const cust2 = cust1.replace(/[\])}[{(]/g, '');
             const cust3 = cust2.replace(/[""]/g, '');
             
+          
             try {
                 await AsyncStorage.setItem('cust3', cust3)
                 let Tab = [this.array];
-                let TAC = Tab.concat([cust3]);
+                //let TAC = Tab.concat([cust3]);
                 this.state.party.push([cust3]);
                 for (var i = 0; i < this.state.party.length; i++) {
-                    this.setState({ party: [...this.state.party]})
-                    console.log(this.state.party.join('\r\n'));
-                    return this.state.party.join('\r\n');
+                    this.setState({ party: [...this.state.party] });
+                    console.log(this.state.party);      
                 }
+                //console.log(this.party);      
                 
             } catch(error) {
                 console.log('There is a problem', error.message);
@@ -109,21 +119,20 @@ export default class Tables extends React.Component {
     }
 
     _setTable = async (index) => {
-        while(true){
+        if (index === 1) {
             const  { navigation } = this.props;
             const cust = navigation.getParam('cust_ID', 'No-User');
             const other_param = navigation.getParam('otherParam', 'No-User');
+
             const cust1 = JSON.stringify(cust);
             const cust2 = cust1.replace(/[\])}[{(]/g, '');
             const cust3 = cust2.replace(/[""]/g, '');
-            if (index ===1) {
-                this.party.push([cust3]);
-                break;
-            }
-            console.log(this.party);
+
+            
         }
+            
     }
-     //this code here is used when someone clicks on the actual table number to open it up and view the users that have been assigned to that table.
+     
      _openTable = async () => {
         try {
             const partyGroup = await AsyncStorage.getItem('cust3');
@@ -131,10 +140,13 @@ export default class Tables extends React.Component {
                 TAC1: partyGroup,
                 otherParam: '101',
             });
+            console.log(partyGroup)
         } catch(error) {
             console.log('No Table', error.message)
         }
      }
+
+    
 
     render() {
         const  { navigation } = this.props;
@@ -186,6 +198,7 @@ export default class Tables extends React.Component {
                 
                 <FlatList
                     data={this.state.arrayHolder}
+                    extraData={this.state}
                     keyExtractor={(item, index) => index.toString()}
                     //numColumns={numColumns}
                     renderItem={({item, index }) => (
