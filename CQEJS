@@ -10,9 +10,13 @@ import {
     Dimensions,
     TouchableHighlight,
     handleTouchItem,
+    TouchableWithoutFeedback
 } from 'react-native';
 
-import {StackNavigator} from 'react-navigation';
+import {
+    StackNavigator,
+    NavigationActions
+} from 'react-navigation';
 import MenuButtonWS from '../Components/MenuButtonWS';
 import { 
     Input,
@@ -32,6 +36,7 @@ export default class CustomerQue extends React.Component {
             rlocationcode: '',
             dataSource: [],
             selectedUsers: [],
+            tablenumber: '',
         };
     }
 
@@ -39,10 +44,11 @@ export default class CustomerQue extends React.Component {
         this.grabCustomers();
     }
 
-    //this is the code that sends the selected items to the next screen (handleTouchItem2)
+
     handleTouchItem2 = async (item) => {
         try {
             let users = this.state.dataSource;
+            let users2 = this.state.selectedUsers;
             await AsyncStorage.setItem('users', JSON.stringify(users));
             this.props.navigation.navigate("Tables", {
                 cust_ID: item,
@@ -53,12 +59,6 @@ export default class CustomerQue extends React.Component {
         }
     }
 
-    handleTouchItem = (item) => {
-        this.props.navigation.navigate("Tables", {
-            cust_ID: item,
-            otherParam: '101',
-        });
-    }
 
     handleQueryChange = (rlocationcode) => {
         this.setState(state => ({ ...state, rlocationcode: rlocationcode || " "}));
@@ -67,25 +67,27 @@ export default class CustomerQue extends React.Component {
     _clearLocationcode = () => {
         this.handleQueryChange("");
     }
-    
-    //this is the code that selects the users (_didSelectUsers)
+
     _didSelectUsers = (item) => {
         let selectedUsers1 = this.state.selectedUsers;
         let isItemSelected = selectedUsers1.filter(item => {
             return item.includes(item);
-        }).length > 20
+        }).length > 8
             ? true : false;
-
+        
         if (isItemSelected) {
-            const index = selectedUsers1.findIndex(
-                obj => obj.item === selectedUsers1
-            );
-            selectedUsers1.splice(index, 1);
+            for (var i = 0; i < selectedUsers1.length; i++) {
+                for (var k = 0; k < selectedUsers1[i].length; k++) {
+                        const index = selectedUsers1.findIndex(
+                        obj => obj.item === selectedUsers1
+                    );
+                }
+            }
+            selectedUsers1.splice(index, 0);
         } else {
             selectedUsers1.push([item]);
+            console.log(selectedUsers1);    
         }
-        this.setState({ ...selectedUsers1 });
-        console.log(selectedUsers1)
     }
 
     _clearUsers = async (item) => {
@@ -98,22 +100,7 @@ export default class CustomerQue extends React.Component {
         }
     }
 
-    _clearUsers1 = (index) => {
-        const selectedUsers2 = this.state.selectedUsers;
-        selectedUsers2.splice(0);
-        this.setState({selectedUsers: selectedUsers2});
-        console.log(selectedUsers2);
-    }
-
-    handleUsersChange = (selectedUsers) => {
-        this.setState(state => ({...state, selectedUsers: selectedUsers || " "}));
-    }
-
-    _clearUsers2 = () => {
-        this.handleUsersChange("");
-        console.log(this.state.selectedUsers);
-    }
-
+    _clearUsers2 = () => {}
 
     render() {
 
@@ -150,7 +137,7 @@ export default class CustomerQue extends React.Component {
                     <Text>Customer Que</Text>
                 </TouchableOpacity>
 
-                
+    
                 <FlatList
                     data={this.state.dataSource}
                     extraData={this.state}
@@ -165,6 +152,21 @@ export default class CustomerQue extends React.Component {
                         </TouchableOpacity>
                     )}
                 />
+                <View>
+                    {this.state.selectedUsers && (
+                        <>
+                            <Text style={styles.text}>
+                                {this.state.selectedUsers}
+                                Enter Table Number
+                            </Text>
+                            <Input 
+                                style={styles.inputContainerStyle} 
+                                placeholder='Table Number'
+                                onChangeText={ (tablenumber) => this.setState({tablenumber}) }
+                            />
+                        </>
+                    )}
+                </View>
 
                <View style={{ flexDirection: 'row'}}>
                 <View style={styles.btn1}>
@@ -175,7 +177,7 @@ export default class CustomerQue extends React.Component {
                 </View>
                 <View style={styles.btn1}>
                     <TouchableOpacity
-                        onPress={this._clearUsers1}>
+                        onPress={this._clearUsers2}>
                         <Text>Clear</Text>
                     </TouchableOpacity> 
                 </View> 
@@ -189,7 +191,7 @@ export default class CustomerQue extends React.Component {
             rlocationcode: this.state.rlocationcode,
         };
         
-        fetch('My URL', {
+        fetch('URL', {
             method: 'POST',
             body: JSON.stringify(rlc),
             headers: {
@@ -210,5 +212,30 @@ export default class CustomerQue extends React.Component {
     }
     GetGridViewItem(uname) {
         Alert.alert(uname);
+    }
+
+    addParty = () => {
+        let party = {
+            tablenumber: this.state.tablenumber,
+            uname: this.state.selectedUsers,
+        };
+        
+        fetch('URL', {
+            method: 'POST',
+            body: JSON.stringify(party),
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        })
+            .then((response) => response.text())
+            .then((responseJson) => {
+                alert(JSON.stringify(responseJson));
+                console.log(party);
+                
+
+                this.props.navigation.navigate('Tables');
+            })
+            .done();
     }
 }
