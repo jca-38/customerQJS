@@ -1,0 +1,70 @@
+import React from 'react';
+import {
+    View,
+    Text,
+    FlatList,
+    Alert,
+    StyleSheet,
+    Dimensions,
+} from 'react-native';
+
+import {StackNavigator} from 'react-navigation';
+import MenuButtonWS from '../Components/MenuButtonWS';
+import Ionicons from  'react-native-vector-icons/Ionicons';
+import {ListItem} from 'react-native-elements';
+import AsyncStorage from '@react-native-community/async-storage';
+
+const numColumns = 3
+const WIDTH = Dimensions.get('window').width
+
+export default class ViewParty extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            dataSource: [],
+        }
+    }
+
+    render() {
+
+        const  { navigation } = this.props;
+        const cust = navigation.getParam('party', 'No-User');
+        const other_param = navigation.getParam('otherParam', 'No-User');
+        const cust1 = JSON.stringify(cust);
+        const cust2 = cust1.replace(/[\])}[{(]/g, '');
+        const cust3 = cust2.replace(/[""]/g, '');
+        const cust4 = cust3.replace(/[,]/g, '');
+        const cust5 = cust4.replace(/[\\]/g, '');
+        
+        const data = [cust];
+        //this.state.dataSource.push(cust1);
+        console.log(data);
+
+        return (
+            <View style={styles.container}>
+                <MenuButtonWS navigation={this.props.navigation} />
+                <FlatList
+                    data={data}
+                    extraData={this.state}
+                    keyExtractor={(item, index) => index.toString()}
+                    ItemSeparatorComponent={() => {
+                        return <View style={{ height: 0.5, width: '100%', backgroundColor: '#c0c0c0' }} />
+                      }}
+                    //numColumns={numColumns}
+                    renderItem={({ item, index }) => (
+                        <ListItem
+                        titleStyle={{ color: 'black', fontWeight: 'bold'}}
+                        title={item}
+                        onPress={() => this._checkoutuser(item)}
+                        bottomDivider
+                        chevron
+                        />
+                    )}
+                />
+            </View>
+        )
+    }
+
+    _checkoutuser = () => {}
+}
