@@ -1,0 +1,67 @@
+import React from 'react';
+import {
+    View,
+    Text,
+    FlatList,
+    StyleSheet, 
+} from 'react-native';
+
+import {
+    ListItem,
+    CheckBox,
+} from 'react-native-elements';
+import BackButtonMGMT from '../Components/BackButtonMGMT';
+
+export default class ViewCategory extends React.Component {
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            dataSource: [],
+            checked: false,
+        }
+    }
+
+    render() {
+
+        const  { navigation } = this.props;
+        const cust = navigation.getParam('food', 'No-User');
+        const other_param = navigation.getParam('otherParam', 'No-User');
+        const cust1 = JSON.parse(cust);
+    
+        const data = cust1;
+        console.log(data);
+
+        return (
+            <View style={styles.container}>
+                <BackButtonMGMT navigation={this.props.navigation} />
+
+                <FlatList
+                    data={data}
+                    extraData={this.state}
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({ item, index }) => (
+                        <CheckBox
+                        center 
+                        titleProps={{ color: 'black', fontWeight: 'bold'}}
+                        title={item}
+                        iconRight
+                        checked={this.state.checked}
+                        size={30}
+                        onPress={() => this.setState({checked: !this.state.checked})}
+                        containerStyle={styles.checkBox}
+                        />
+                        
+                    )}
+                />
+
+            </View>
+        )
+    }
+
+    onCheck = (item) => {
+        this.setState((state) => ({
+            checked: !state.checked,
+        }));
+    }
+}
