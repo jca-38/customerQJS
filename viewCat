@@ -9,59 +9,105 @@ import {
 import {
     ListItem,
     CheckBox,
+    ButtonGroup
 } from 'react-native-elements';
-import BackButtonMGMT from '../Components/BackButtonMGMT';
+import BackButtonWS2 from '../Components/BackButtonWS2';
 
-export default class ViewCategory extends React.Component {
+import {
+    StackNavigator,
+    navigation,
+} from 'react-navigation';
+
+export default class ViewCategoryWS extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            dataSource: [],
-            checked: false,
-        }
-    }
-
-    render() {
-
         const  { navigation } = this.props;
         const cust = navigation.getParam('food', 'No-User');
         const other_param = navigation.getParam('otherParam', 'No-User');
         const cust1 = JSON.parse(cust);
+        const data = cust1.map(item => ({label: item, checked: false}));
+        this.state = {
+            dataSource: [],
+            data,
+            checked: null,
+            selectedIndex: 2,
+        }
+        this.updateIndex = this.updateIndex.bind(this)
+    }
+
+    updateIndex (selectedIndex) {
+        this.setState({selectedIndex})
+        this.nextScreen(selectedIndex)
+        this.clearArray(selectedIndex)
+    }
+
     
-        const data = cust1;
+    render() {
+        const buttons = ['Next', 'Clear']
+        const { selectedIndex } = this.state
+        const {data} = this.state;
         console.log(data);
+        alert(this.state.dataSource);
+        
 
         return (
             <View style={styles.container}>
-                <BackButtonMGMT navigation={this.props.navigation} />
-
+                <BackButtonWS2 navigation={this.props.navigation} />
+                
                 <FlatList
                     data={data}
                     extraData={this.state}
                     keyExtractor={(item, index) => index.toString()}
                     renderItem={({ item, index }) => (
-                        <CheckBox
+                        <CheckBox 
                         center 
                         titleProps={{ color: 'black', fontWeight: 'bold'}}
-                        title={item}
+                        title={item.label}
                         iconRight
-                        checked={this.state.checked}
+                        checked={item.checked}
                         size={30}
-                        onPress={() => this.setState({checked: !this.state.checked})}
-                        containerStyle={styles.checkBox}
-                        />
-                        
+                        onPress={() => this.onCheck(index, item.label)}
+                        containerStyle={styles.checkBox} 
+                        />    
                     )}
                 />
+                <ButtonGroup 
+                onPress={this.updateIndex}
+                selectedIndex={selectedIndex}
+                selectedButtonStyle={{backgroundColor: 'blue'}}
+                buttons={buttons}
+                containerStyle={styles.buttonGroup}
+                />
+                
 
             </View>
         )
     }
 
-    onCheck = (item) => {
-        this.setState((state) => ({
-            checked: !state.checked,
-        }));
+    clearArray = (index) => {
+        if (index === 1) {
+            let fresh = this.state.data.length = 1;
+            console.log(fresh);
+        }
+    }
+
+    onCheck = (index, item) => {
+        let {data} = this.state;
+        data[index].checked = !data[index].checked;
+        this.setState({data})
+        this.state.dataSource.push([item]);
+        alert(this.state.dataSource);
+        console.log(this.state.dataSource);
+    }
+
+    nextScreen = (index, item) => {
+        if (index === 0) {
+            this.props.navigation.navigate('UsersBill', {
+                foodCat: this.state.dataSource,
+                otherParam: '101',
+            });
+            alert(this.state.dataSource);   
+        }
     }
 }
