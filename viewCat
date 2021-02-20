@@ -1,113 +1,159 @@
-import React from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import {
     View,
-    Text,
+    Text, 
     FlatList,
-    StyleSheet, 
+    StyleSheet,
 } from 'react-native';
-
 import {
+    Button,
     ListItem,
-    CheckBox,
-    ButtonGroup
+    PricingCard,
 } from 'react-native-elements';
-import BackButtonWS2 from '../Components/BackButtonWS2';
 
-import {
-    StackNavigator,
-    navigation,
-} from 'react-navigation';
+import Icon from 'react-native-vector-icons/FontAwesome';
+import ItemContext from '../context/CategoryItems';
+import useSelectionChange from '../Components/SelectionChange';
 
-export default class ViewCategoryWS extends React.Component {
-
-    constructor(props) {
-        super(props);
-        const  { navigation } = this.props;
-        const cust = navigation.getParam('food', 'No-User');
-        const other_param = navigation.getParam('otherParam', 'No-User');
-        const cust1 = JSON.parse(cust);
-        const data = cust1.map(item => ({label: item, checked: false}));
-        this.state = {
-            dataSource: [],
-            data,
-            checked: null,
-            selectedIndex: 2,
-        }
-        this.updateIndex = this.updateIndex.bind(this)
-    }
-
-    updateIndex (selectedIndex) {
-        this.setState({selectedIndex})
-        this.nextScreen(selectedIndex)
-        this.clearArray(selectedIndex)
-    }
-
+function ViewCategoryWS2({ navigation }) {
+    const {category, setCategory} = useContext(ItemContext);
+    const [meal, setMeal] = useState([]);
+    const [items, setItems] = useState([]);
+    const selectionMode = useSelectionChange(items);
+    const [eats, setEats] = useState([]);
+    const [count, setCount] = useState(0);
+    const [bill, setBill] = useState([]);
     
-    render() {
-        const buttons = ['Next', 'Clear']
-        const { selectedIndex } = this.state
-        const {data} = this.state;
-        console.log(data);
-        alert(this.state.dataSource);
+    //const category items looks like this....
+    Bacon Burger
+    13.50
+    Fried Fish
+    10.50
+    Pizza
+    9.60
+    Turkey Burger
+    12.00
+
+    function back() {
+        navigation.navigate('MenuWS2');
+    }
+ 
+    const selectFood2 = item => {
+        setItems(
+            items.map(i => {
+                if (item === i) {
+                    i.selected = !i.selected;
+                }
+                return i;
+            }),
+        );
+    };
+
+    function clear(index) {
+        eats.pop(index);
+        setEats([...eats]);
+    }
         
 
-        return (
-            <View style={styles.container}>
-                <BackButtonWS2 navigation={this.props.navigation} />
-                
-                <FlatList
-                    data={data}
-                    extraData={this.state}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item, index }) => (
-                        <CheckBox 
-                        center 
-                        titleProps={{ color: 'black', fontWeight: 'bold'}}
-                        title={item.label}
-                        iconRight
-                        checked={item.checked}
-                        size={30}
-                        onPress={() => this.onCheck(index, item.label)}
-                        containerStyle={styles.checkBox} 
-                        />    
-                    )}
-                />
-                <ButtonGroup 
-                onPress={this.updateIndex}
-                selectedIndex={selectedIndex}
-                selectedButtonStyle={{backgroundColor: 'blue'}}
-                buttons={buttons}
-                containerStyle={styles.buttonGroup}
-                />
-                
-
-            </View>
-        )
-    }
-
-    clearArray = (index) => {
-        if (index === 1) {
-            let fresh = this.state.data.length = 1;
-            console.log(fresh);
+    const fPress = item => {
+        if (selectionMode) {
+            //selectFood2(item)
+        } else {
+            pressItem(item);
         }
+    };
+
+    function totalPlus(item) {
+        let sum = Number(bill) + Number(item);
+        setBill(sum);
+        //alert(sum);
+
+    }
+    function totalMinus(item, index) {
+        let sum = Number(bill) - Number(item);
+        setBill(sum);
+        clear(index);    
     }
 
-    onCheck = (index, item) => {
-        let {data} = this.state;
-        data[index].checked = !data[index].checked;
-        this.setState({data})
-        this.state.dataSource.push([item]);
-        alert(this.state.dataSource);
-        console.log(this.state.dataSource);
+    function seePrice(item) {
+        const cost2 = item.slice(-6);
+        setBill(cost2);
+        alert(cost2);
+        //totalPlus(item);
+        //setBill([cost2]);
+        //alert(cost2.valueOf());
+        //alert(bill);
+    };
+
+    
+    const pressItem = (item, index) => {
+        //setEats([...eats, item]);
+        //seePrice(item);
+        pair(item);
+        //next(item);
+        //alert(item);
+    };
+
+    function pair(item, index) {
+        const rows = category.reduce(function (rows, key, index) {
+            return (index % 2 == 0 ? rows.push([key]) 
+            : rows[rows.length-1].push(key)) && rows; 
+        }, [])
+    
+        //alert(category.indexOf(item));
+        alert(item);
+        //setEats([...eats, item]);
+        //setBill(rows[0][1]);
+        //console.log(rows)
     }
 
-    nextScreen = (index, item) => {
-        if (index === 0) {
-            this.props.navigation.navigate('UsersBill', {
-                foodCat: this.state.dataSource,
-                otherParam: '101',
-            });
-            alert(this.state.dataSource);   
-        }
-    }
+    function priceItem(item) {
+        
+    };
+
+    
+    return (
+        <View style={styles.container}>
+
+            <Icon 
+                name='arrow-left'
+                color="#000000"
+                size={25}
+                style={styles.menuIcon}
+                onPress={back}
+            />
+            
+            <FlatList 
+                data={category}
+                //extraData={rows}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({ item, index, rows }) => (
+                    <ListItem
+                    titleStyle={{ color: 'black', fontWeight: 'bold'}}
+                    title={item}
+                    onPress={() => pair(item)}
+                    //onPress={() => fPress(item)}
+                    //onLongPress={() => clear(item)}
+                    onLongPress={() => totalMinus(item)}
+                    //onPress={() => seePrice(item)}
+                    style={[item.selected ? styles.selected : styles.normal]}
+                    bottomDivider
+                    chevron
+                    />
+                )}
+            />
+
+            <PricingCard 
+                title='USER'
+                price={['$', bill]}
+                info={[...eats]}
+                //info={eats}
+                button={{ title: 'SEND'}}
+            />
+            
+        </View>
+        
+    )
+
+
 }
